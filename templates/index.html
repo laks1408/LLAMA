@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document RAG System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1> LLAMA TEST</h1>
+            <p>Upload files and ask questions</p>
+        </header>
+
+        <div class="upload-section">
+            <input type="file" id="file-input" accept=".pdf,.txt,.docx">
+            <button id="upload-btn">Upload Document</button>
+            <div id="upload-status"></div>
+        </div>
+
+        <div class="chat-container">
+            <textarea id="question-input" placeholder="Ask about your documents..."></textarea>
+            <button id="ask-btn">Ask Question</button>
+            <div id="answer-box" class="markdown-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // File Upload
+        document.getElementById('upload-btn').addEventListener('click', async () => {
+            const fileInput = document.getElementById('file-input');
+            const statusEl = document.getElementById('upload-status');
+            
+            if (!fileInput.files.length) {
+                statusEl.textContent = '❌ Please select a file';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            statusEl.textContent = '⏳ Processing...';
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                statusEl.textContent = data.message;
+                fileInput.value = '';
+            } catch (error) {
+                statusEl.textContent = '❌ Upload failed';
+                console.error(error);
+            }
+        });
+
+        // Question Handling
+        document.getElementById('ask-btn').addEventListener('click', async () => {
+            const question = document.getElementById('question-input').value.trim();
+            const answerBox = document.getElementById('answer-box');
+            
+            if (!question) {
+                answerBox.innerHTML = '❌ Please enter a question';
+                return;
+            }
+
+            answerBox.innerHTML = '💭 Thinking...';
+            
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+                
+                const data = await response.json();
+                answerBox.innerHTML = marked.parse(data.answer);
+            } catch (error) {
+                answerBox.innerHTML = '⚠️ Error getting answer';
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

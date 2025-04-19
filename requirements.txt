@@ -1,0 +1,8 @@
+flask
+langchain-ollama
+langchain-community
+faiss-cpu
+pypdf
+docx2txt
+werkzeug
+pandas
