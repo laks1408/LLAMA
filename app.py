@@ -11,21 +11,18 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'txt', 'docx'}
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  #16MB
 
-# Initialize components
-model = Ollama(model="llama2", temperature=0.3)  # More deterministic responses
+model = Ollama(model="llama2", temperature=0.3)
 embeddings = OllamaEmbeddings(model="llama2")
 vectorstore = None
 
-# Text splitter
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=1000,
     chunk_overlap=200,
     length_function=len
 )
 
-# Formatting-enhanced prompt
 template = """You are a technical assistant. Provide answers with:
 - Clear Markdown formatting
 - Bullet points for lists
@@ -128,7 +125,6 @@ def ask():
             question=question
         ))
         
-        # Convert Markdown to HTML for frontend
         formatted_response = response
         return jsonify({'answer': formatted_response})
     except Exception as e:
